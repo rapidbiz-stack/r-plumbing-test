@@ -4,29 +4,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R Plumbing | Premium Professional Services</title>
+    <title>R Plumbing | Professional Plumbing Solutions</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; opacity: 0; transition: opacity 0.5s ease-in; }
+        body.loaded { opacity: 1; }
         .scroll-smooth { scroll-behavior: smooth; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-        .transition-all-300 { transition: all 0.3s ease; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
     </style>
     <script type="importmap">
 {
   "imports": {
     "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
     "react": "https://esm.sh/react@^19.2.4",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
     "react/": "https://esm.sh/react@^19.2.4/"
   }
 }
 </script>
 </head>
 <body class="bg-slate-50 text-slate-900 scroll-smooth">
-    <div id="app"></div>
+    <div id="app">
+        <!-- Initial skeleton to prevent white screen -->
+        <div class="h-screen w-full flex items-center justify-center bg-white">
+            <div class="flex flex-col items-center gap-4">
+                <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-slate-400 font-medium tracking-widest uppercase text-xs">R Plumbing Loading...</p>
+            </div>
+        </div>
+    </div>
     <script type="module" src="index.js"></script>
 </body>
 </html>
