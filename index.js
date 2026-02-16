@@ -110,20 +110,6 @@ const DiagnosticTool = () => `
                     <div class="bg-blue-500/20 text-blue-400 w-fit px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-8">AI Assistant</div>
                     <h2 class="text-4xl lg:text-5xl font-black mb-8 leading-tight">Instant AI <br><span class="text-blue-500">Diagnostic Tool</span></h2>
                     <p class="text-slate-400 text-lg leading-relaxed mb-10">Don't wait for a callback. Describe your symptoms to our Gemini-powered engine for an immediate assessment of the problem.</p>
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-4 text-slate-300">
-                            <i class="fa-solid fa-check-circle text-blue-500"></i>
-                            <span>Instant Root Cause Analysis</span>
-                        </div>
-                        <div class="flex items-center gap-4 text-slate-300">
-                            <i class="fa-solid fa-check-circle text-blue-500"></i>
-                            <span>Severity Level Estimation</span>
-                        </div>
-                        <div class="flex items-center gap-4 text-slate-300">
-                            <i class="fa-solid fa-check-circle text-blue-500"></i>
-                            <span>DIY vs Professional Guidance</span>
-                        </div>
-                    </div>
                 </div>
                 <div class="lg:w-7/12 bg-slate-50/50 p-8 lg:p-16 flex flex-col justify-center border-l border-slate-800" id="diagnostic-display">
                     ${DiagnosticForm()}
@@ -144,7 +130,6 @@ const DiagnosticForm = () => `
                     class="w-full h-48 p-8 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-800 placeholder-slate-400"
                     placeholder="e.g., 'My kitchen faucet is leaking from the handle and making a high-pitched whistling sound when I turn on the hot water.'"
                 ></textarea>
-                <div class="absolute bottom-4 right-6 text-slate-300 text-sm">Gemini 3 Flash</div>
             </div>
             <button type="submit" class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold text-lg hover:bg-blue-600 transition-all flex items-center justify-center gap-3">
                 <i class="fa-solid fa-microchip"></i>
@@ -163,7 +148,6 @@ const DiagnosticResultTemplate = (data) => `
                 data.severity === 'high' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
             }">${data.severity || 'Analysis'} Priority</span>
         </div>
-        
         <div class="grid gap-8 mb-12">
             <div class="p-8 bg-blue-50 rounded-3xl border border-blue-100">
                 <p class="text-xs font-black text-blue-600 uppercase tracking-widest mb-3">Likely Cause</p>
@@ -174,9 +158,8 @@ const DiagnosticResultTemplate = (data) => `
                 <p class="text-slate-700 leading-relaxed text-lg">${data.recommendation}</p>
             </div>
         </div>
-
         <div class="flex flex-col sm:flex-row gap-4">
-            <button onclick="window.resetDiagnostic()" class="flex-1 py-4 text-slate-500 font-bold hover:text-blue-600 transition-colors">
+            <button id="reset-diag-btn" class="flex-1 py-4 text-slate-500 font-bold hover:text-blue-600 transition-colors">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Start Over
             </button>
             <a href="tel:5557758622" class="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold text-center hover:bg-blue-700 shadow-xl shadow-blue-200">
@@ -196,22 +179,6 @@ const Footer = () => `
                         <span class="text-2xl font-bold tracking-tight text-slate-900">Plumbing</span>
                     </div>
                     <p class="text-slate-400 text-xl max-w-sm mb-10 leading-relaxed">Modern solutions for residential and commercial plumbing needs. 24/7 reliability.</p>
-                    <div class="flex gap-4">
-                        ${['facebook', 'instagram', 'twitter', 'linkedin'].map(s => `
-                            <a href="#" class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-blue-600 hover:text-white transition-all">
-                                <i class="fa-brands fa-${s}"></i>
-                            </a>
-                        `).join('')}
-                    </div>
-                </div>
-                <div>
-                    <h4 class="font-black text-slate-900 uppercase tracking-widest text-xs mb-8">Service Areas</h4>
-                    <ul class="space-y-4 text-slate-500 font-medium">
-                        <li>Downtown Metro</li>
-                        <li>Westside Suburbs</li>
-                        <li>Coastal District</li>
-                        <li>Northern Highlands</li>
-                    </ul>
                 </div>
                 <div>
                     <h4 class="font-black text-slate-900 uppercase tracking-widest text-xs mb-8">Emergency</h4>
@@ -221,11 +188,6 @@ const Footer = () => `
             </div>
             <div class="pt-12 border-t border-slate-50 text-slate-400 text-sm flex justify-between">
                 <p>© 2024 R Plumbing Inc.</p>
-                <div class="flex gap-8">
-                    <a href="#">Privacy</a>
-                    <a href="#">Terms</a>
-                    <a href="#">Licensing</a>
-                </div>
             </div>
         </div>
     </footer>
@@ -233,9 +195,20 @@ const Footer = () => `
 
 // --- AI Logic ---
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Wrapped in a helper to prevent immediate crash if process.env is missing
+const getAIClient = () => {
+    try {
+        return new GoogleGenAI({ apiKey: process.env.API_KEY });
+    } catch (e) {
+        console.error("AI Client Init Error:", e);
+        return null;
+    }
+};
 
 async function runDiagnostic(query) {
+    const ai = getAIClient();
+    if (!ai) return { diagnosis: "System Error", severity: "high", recommendation: "Please call us directly." };
+
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
@@ -259,19 +232,14 @@ async function runDiagnostic(query) {
         return {
             diagnosis: "Unable to analyze request.",
             severity: "high",
-            recommendation: "Please call our technicians immediately for a manual review."
+            recommendation: "Please call our technicians at (555) 775-8622."
         };
     }
 }
 
 // --- App Orchestration ---
 
-window.resetDiagnostic = () => {
-    document.getElementById('diagnostic-display').innerHTML = DiagnosticForm();
-    attachFormListener();
-};
-
-function attachFormListener() {
+function attachEventListeners() {
     const form = document.getElementById('ai-form');
     if (form) {
         form.addEventListener('submit', async (e) => {
@@ -283,18 +251,28 @@ function attachFormListener() {
                 <div class="flex flex-col items-center justify-center py-20 animate-fade-in">
                     <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
                     <p class="text-xl font-bold text-slate-900">Analyzing symptoms...</p>
-                    <p class="text-slate-400 mt-2">Connecting to AI Engine</p>
                 </div>
             `;
 
             const result = await runDiagnostic(query);
             display.innerHTML = DiagnosticResultTemplate(result);
+            
+            // Attach reset listener
+            const resetBtn = document.getElementById('reset-diag-btn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    display.innerHTML = DiagnosticForm();
+                    attachEventListeners();
+                });
+            }
         });
     }
 }
 
 function init() {
     const root = document.getElementById('app');
+    if (!root) return;
+
     root.innerHTML = `
         ${Header()}
         <main>
@@ -305,16 +283,18 @@ function init() {
         ${Footer()}
     `;
 
-    document.body.classList.add('loaded');
-    attachFormListener();
+    // Signal loader to fade out
+    document.body.classList.add('ready');
+    
+    attachEventListeners();
 
     // Scroll Observer
     window.addEventListener('scroll', () => {
         const header = document.getElementById('main-header');
+        if (!header) return;
         const isScrolled = window.scrollY > 50;
         if (isScrolled !== state.isScrolled) {
             state.isScrolled = isScrolled;
-            // Update header classes manually to avoid full re-render
             if (isScrolled) {
                 header.classList.add('bg-white/90', 'backdrop-blur-md', 'shadow-sm', 'py-3');
                 header.classList.remove('bg-transparent', 'py-6');
@@ -330,5 +310,9 @@ function init() {
     });
 }
 
-// Start the application
-init();
+// Start the application when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
