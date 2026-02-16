@@ -4,32 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R Plumbing | Professional Plumbing Solutions</title>
+    <title>R Plumbing | Cyber-Infrastructure & AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .scroll-smooth { scroll-behavior: smooth; }
-        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        :root {
+            --neon-blue: #00f2ff;
+            --cyber-slate: #0f172a;
+        }
+        body { 
+            font-family: 'Space Grotesk', sans-serif; 
+            background-color: var(--cyber-slate);
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .glass { 
+            background: rgba(15, 23, 42, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+            border: 1px solid rgba(0, 242, 255, 0.5);
+        }
+        .text-neon { color: var(--neon-blue); text-shadow: 0 0 10px rgba(0, 242, 255, 0.5); }
         
-        /* Loading overlay for the very first paint */
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(0, 242, 255, 0.1);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
         #initial-loader {
             position: fixed;
             inset: 0;
-            background: white;
+            background: #020617;
             z-index: 9999;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.4s ease-out;
+            transition: opacity 0.6s ease-out;
         }
         body.ready #initial-loader {
             opacity: 0;
             pointer-events: none;
+        }
+        .nav-link.active {
+            color: var(--neon-blue);
+            border-bottom: 2px solid var(--neon-blue);
         }
     </style>
     <script type="importmap">
@@ -42,13 +73,22 @@
 }
 </script>
 </head>
-<body class="bg-slate-50 text-slate-900 scroll-smooth">
+<body class="scroll-smooth">
+    <div class="scanline"></div>
+    
     <div id="initial-loader">
-        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="text-slate-400 font-medium tracking-widest uppercase text-xs">R Plumbing</p>
+        <div class="relative">
+            <div class="w-24 h-24 border-2 border-cyan-500/20 rounded-full animate-ping absolute"></div>
+            <div class="w-24 h-24 border-t-2 border-cyan-400 rounded-full animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center font-bold text-cyan-400">R</div>
+        </div>
+        <p class="mt-8 text-cyan-400 font-mono tracking-widest uppercase text-xs animate-pulse">Initializing Cyber-Systems...</p>
     </div>
 
     <div id="app"></div>
+
+    <!-- Global AI Chat Widget -->
+    <div id="ai-widget-container"></div>
     
     <script type="module" src="index.js"></script>
 </body>
