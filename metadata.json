@@ -1,0 +1,7 @@
+{
+  "name": "R Plumbing - Professional Solutions",
+  "description": "Premium plumbing services with AI-powered diagnostic tool.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
